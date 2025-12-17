@@ -54,6 +54,7 @@ class GameMedleyGame(Game):
     def generate_objectives(
         self,
         count: int = 1,
+        bag_size: int = 1,
         include_difficult: bool = False,
         include_time_consuming: bool = False,
         excluded_games_time_consuming: list[str] = None,
@@ -70,10 +71,22 @@ class GameMedleyGame(Game):
 
         passes_templates: int = 0
 
+        game_bag: list[type[Game]] | None = None
+        if bag_size > 0:
+            game_bag = self.game_selection * bag_size
+
         while len(objectives) < count:
             passes_templates += 1
 
-            game: type[Game] = self.random.choice(self.game_selection)
+            game: type[Game]
+            if game_bag is None:
+                game = self.random.choice(self.game_selection)
+            else:
+                game_index: int = self.random.choice([i for i in range(len(game_bag))])
+                game = game_bag[game_index]
+                game_bag.pop(game_index)
+                if len(game_bag) == 0:
+                    game_bag = list(self.game_selection)
 
             is_in_time_consuming_exclusions: bool = game.game_name_with_platforms() in excluded_games_time_consuming
             include_time_consuming = include_time_consuming and not is_in_time_consuming_exclusions

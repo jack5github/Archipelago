@@ -313,6 +313,19 @@ class GameMedleyGameSelection(OptionList):
     default = list()
 
 
+class GameMedleyGameSelectionBagSize(Range):
+    """
+    Determines the size of the bag from which the weighted games in 'game_medley_game_selection' will be randomly selected. For more information, see 'game_selection_bag_size'.
+    """
+
+    display_name: str = "Game Medley Game Selection Bag Size"
+
+    range_start: int = 0
+    range_end: int = 5
+
+    default = 1
+
+
 class GameSelection(OptionList):
     """
     Defines the game pool to select from.
@@ -326,6 +339,23 @@ class GameSelection(OptionList):
     valid_keys = sorted(AutoGameRegister.games.keys())
 
     default = sorted(AutoGameRegister.games.keys())
+
+
+class GameSelectionBagSize(Range):
+    """
+    Determines the size of the bag from which the weighted games in 'game_selection' will be randomly selected.
+
+    0: No bag will be used and games may appear multiple times unbounded.
+    1: The bag will be filled with 1 of each game and will be drawn from randomly until it is empty, resulting in an even distribution of games. If the bag becomes empty, it will be refilled.
+    2+: The bag will initially be filled with the chosen number of each game, resulting in a slightly less even distribution of games where the maximum number of each game is the chosen number. Subsequent fills will revert to an even distribution. Similar logic applies for all other bag sizes.
+    """
+
+    display_name: str = "Game Selection Bag Size"
+
+    range_start: int = 0
+    range_end: int = 5
+
+    default = 1
 
 
 class IncludeAdultOnlyOrUnratedGames(Toggle):
@@ -435,7 +465,9 @@ class KeymastersKeepOptions(PerGameCommonOptions, GameArchipelagoOptions):
     game_medley_mode: GameMedleyMode
     game_medley_percentage_chance: GameMedleyPercentageChance
     game_medley_game_selection: GameMedleyGameSelection
+    game_medley_game_selection_bag_size: GameMedleyGameSelectionBagSize
     game_selection: GameSelection
+    game_selection_bag_size: GameSelectionBagSize
     include_adult_only_or_unrated_games: IncludeAdultOnlyOrUnratedGames
     include_modern_console_games: IncludeModernConsoleGames
     include_difficult_objectives: IncludeDifficultObjectives
@@ -489,7 +521,9 @@ option_groups: typing.List[OptionGroup] = [
             GameMedleyMode,
             GameMedleyPercentageChance,
             GameMedleyGameSelection,
+            GameMedleyGameSelectionBagSize,
             GameSelection,
+            GameMedleyGameSelectionBagSize,
         ],
     ),
     OptionGroup(

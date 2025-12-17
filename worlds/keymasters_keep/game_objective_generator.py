@@ -72,12 +72,14 @@ class GameObjectiveGenerator:
         self,
         plan: List[int] = None,
         random: Random = None,
+        bag_size: int = 1,
         include_difficult: bool = False,
         excluded_games_difficult: List[str] = None,
         include_time_consuming: bool = False,
         excluded_games_time_consuming: List[str] = None,
         game_medley_mode: bool = False,
         game_medley_percentage_chance: int = 100,
+        game_medley_bag_size: int = 1,
     ) -> GameObjectiveGeneratorData:
         if plan is None or not len(plan):
             return list()
@@ -89,9 +91,17 @@ class GameObjectiveGenerator:
 
         if plan_length <= len(self.games):
             game_selection = random.sample(self.games, plan_length)
-        else:
+        elif bag_size <= 0:
             for _ in range(plan_length):
                 game_selection.append(random.choice(self.games))
+        else:
+            game_bag: List[Type[Game]] = self.games * bag_size
+            while len(game_selection) < plan_length:
+                game_index: int = random.choice([i for i in range(len(game_bag))])
+                game_selection.append(game_bag[game_index])
+                game_bag.pop(game_index)
+                if len(game_bag) == 0:
+                    game_bag = list(self.games)
 
         if game_medley_mode:
             for i in range(len(game_selection)):
@@ -118,13 +128,16 @@ class GameObjectiveGenerator:
                 optional_constraints: List[str]
                 objectives: List[str]
 
-                optional_constraints, objectives, objectives_in_use = game.generate_objectives(
-                    count=count,
-                    include_difficult=include_difficult,
-                    include_time_consuming=include_time_consuming,
-                    excluded_games_time_consuming=excluded_games_time_consuming,
-                    excluded_games_difficult=excluded_games_difficult,
-                    objectives_in_use=objectives_in_use,
+                optional_constraints, objectives, objectives_in_use = (
+                    game.generate_objectives(
+                        count=count,
+                        bag_size=game_medley_bag_size,
+                        include_difficult=include_difficult,
+                        include_time_consuming=include_time_consuming,
+                        excluded_games_time_consuming=excluded_games_time_consuming,
+                        excluded_games_difficult=excluded_games_difficult,
+                        objectives_in_use=objectives_in_use,
+                    )
                 )
 
                 data.append((game, optional_constraints, objectives))
