@@ -21,6 +21,7 @@ from .data.item_data import KeymastersKeepItemData, item_data
 from .data.location_data import KeymastersKeepLocationData, location_data
 
 from .data.mapping_data import (
+    region_to_completion_location,
     region_to_trial_locations,
     region_to_unlock_location_and_item,
     shop_to_shop_item_locations,
@@ -92,8 +93,8 @@ class KeymastersKeepWebWorld(WebWorld):
 class KeymastersKeepWorld(World):
     """
     Embark on a quest through the Keymaster's Keep, a mysterious castle where every door and passage hides a series of
-    video game chalenges, and only the right keys can unlock the path forward. Complete challenges, find keys, uncover
-    artifacts of resolve, and face the ultimate trial to claim victory.
+    video game chalenges, and only the right keys can unlock the path forward. Complete challenges, find keys,
+    artifacts of resolve or conquest medallions, and face the ultimate trial to claim victory.
     """
 
     options_dataclass = KeymastersKeepOptions
@@ -114,6 +115,7 @@ class KeymastersKeepWorld(World):
 
     web = KeymastersKeepWebWorld()
 
+    area_completion_locations: Dict[KeymastersKeepRegions, KeymastersKeepLocationData]
     area_game_optional_constraints: Dict[str, List[str]]
     area_games: Dict[str, str]
     area_trial_game_objectives: Dict[str, List[str]]
@@ -122,6 +124,7 @@ class KeymastersKeepWorld(World):
     area_trials_minimum: int
     artifacts_of_resolve_required: int
     artifacts_of_resolve_total: int
+    conquest_medallions_required: int
     excluded_games_difficult_objectives: List[str]
     excluded_games_time_consuming_objectives: List[str]
     filler_item_names: List[str] = item_groups()["Filler"]
@@ -248,6 +251,10 @@ class KeymastersKeepWorld(World):
             smallest_possible_trial_count = self.area_trials_minimum * (self.keep_areas - shop_count)
             smallest_possible_trial_count += smallest_possible_shop_item_count
 
+        self.conquest_medallions_required = max(round(
+            (self.keep_areas - shop_count) * (self.options.conquest_medallions_percentage_required.value / 100.0)
+        ), 1)
+
         locations_needed: int = self.magic_keys_total
 
         if self.goal == KeymastersKeepGoals.KEYMASTERS_CHALLENGE:
@@ -358,7 +365,7 @@ class KeymastersKeepWorld(World):
             ## Keymaster's Keep Area
             region_area.connect(region_keymasters_keep)
 
-            # Assign Trial Locations
+            # Assign Trial & Completion Locations
             if area in self.area_trials:
                 trial: KeymastersKeepLocationData
                 for trial in self.area_trials[area]:
@@ -370,6 +377,18 @@ class KeymastersKeepWorld(World):
                     )
 
                     region_area.locations.append(trial_location)
+
+                completion_location: KeymastersKeepLocation = KeymastersKeepLocation(
+                    self.player,
+                    self.area_completion_locations[area].name,
+                    self.area_completion_locations[area].archipelago_id,
+                    region_area,
+                )
+
+                if self.goal == KeymastersKeepGoals.AREA_DOMINATION:
+                    completion_location.place_locked_item(self.create_item(KeymastersKeepItems.CONQUEST_MEDALLION.value))
+
+                region_area.locations.append(completion_location)
 
             # Handle Shops
             if area in self.shop_data:
@@ -488,6 +507,18 @@ class KeymastersKeepWorld(World):
             )
 
             region_endgame.connect(region_keymasters_keep)
+        elif self.goal == KeymastersKeepGoals.AREA_DOMINATION:
+            # Endgame
+            region_keymasters_keep.connect(
+                region_endgame,
+                rule=eval(access_rule_for(
+                    [KeymastersKeepItems.CONQUEST_MEDALLION],
+                    self.player,
+                    self.conquest_medallions_required
+                )),
+            )
+
+            region_endgame.connect(region_keymasters_keep)
 
         self.multiworld.regions.append(region_keymasters_keep)
         self.multiworld.regions.append(region_endgame)
@@ -550,6 +581,7 @@ class KeymastersKeepWorld(World):
 
     def fill_slot_data(self) -> Dict[str, Any]:
         slot_data: Dict[str, Any] = {
+            "area_completion_locations": {area.value: completion.name for area, completion in self.area_completion_locations.items()},
             "area_game_optional_constraints": self.area_game_optional_constraints,
             "area_games": self.area_games,
             "area_trial_game_objectives": self.area_trial_game_objectives,
@@ -558,6 +590,7 @@ class KeymastersKeepWorld(World):
             "area_trials_minimum": self.area_trials_minimum,
             "artifacts_of_resolve_required": self.artifacts_of_resolve_required,
             "artifacts_of_resolve_total": self.artifacts_of_resolve_total,
+            "conquest_medallions_required": self.conquest_medallions_required,
             "game_medley_mode": self.game_medley_mode,
             "game_medley_percentage_chance": self.game_medley_percentage_chance,
             "goal": self.goal.value,
@@ -818,6 +851,7 @@ class KeymastersKeepWorld(World):
 
         # Assign Trials to Areas
         self.area_trials = dict()
+        self.area_completion_locations = dict()
 
         area: KeymastersKeepRegions
         for area in self.selected_areas:
@@ -828,6 +862,7 @@ class KeymastersKeepWorld(World):
             trial_count: int = self.random.randint(self.area_trials_minimum, self.area_trials_maximum)
 
             self.area_trials[area] = self.random.sample(possible_trials, trial_count)
+            self.area_completion_locations[area] = location_data[region_to_completion_location[area]]
 
     def _generate_game_objective_data(self) -> None:
         game_selection: List[str] = sorted(self.game_selection[:])

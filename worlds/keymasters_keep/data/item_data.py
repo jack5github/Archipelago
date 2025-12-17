@@ -1063,4 +1063,10 @@ item_data: Dict[KeymastersKeepItems, KeymastersKeepItemData] = {
         classification=ItemClassification.progression,
         tags=(KeymastersKeepTags.RELICS,),
     ),
+    # Conquest Medallion
+    KeymastersKeepItems.CONQUEST_MEDALLION: KeymastersKeepItemData(
+        archipelago_id=5000,
+        classification=ItemClassification.progression,
+        tags=(KeymastersKeepTags.MEDALLIONS,),
+    ),
 }

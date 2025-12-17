@@ -24,12 +24,14 @@ class Goal(Choice):
 
     Keymasters Challenge: Retrieve X artifacts of resolve to unlock the Keymaster's challenge chamber and beat the ultimate challenge
     Magic Key Heist: Acquire X magic keys and escape the Keymaster's Keep
+    Area Domination: Acquire conquest medallions by completing all trials in X% of keep areas and escape the Keymaster's Keep
     """
 
     display_name: str = "Goal"
 
     option_keymasters_challenge: int = 0
     option_magic_key_heist: int = 1
+    option_area_domination: int = 2
 
     default = 0
 
@@ -77,6 +79,21 @@ class MagicKeysRequired(Range):
     range_end: int = 50
 
     default = 18
+
+
+class ConquestMedallionsPercentageRequired(Range):
+    """
+    Determines the percentage of Conquest Medallions required before escaping the Keymaster's Keep. Completing all trials in a keep awards a Conquest Medallion.
+
+    Only relevant if the selected goal is Area Domination.
+    """
+
+    display_name: str = "Conquest Medallions Percentage Required"
+
+    range_start: int = 1
+    range_end: int = 100
+
+    default = 80
 
 
 class KeepAreas(Range):
@@ -449,6 +466,7 @@ class KeymastersKeepOptions(PerGameCommonOptions, GameArchipelagoOptions):
     artifacts_of_resolve_total: ArtifactsOfResolveTotal
     artifacts_of_resolve_required: ArtifactsOfResolveRequired
     magic_keys_required: MagicKeysRequired
+    conquest_medallions_percentage_required: ConquestMedallionsPercentageRequired
     keep_areas: KeepAreas
     magic_keys_total: MagicKeysTotal
     unlocked_areas: UnlockedAreas
@@ -488,6 +506,7 @@ option_groups: typing.List[OptionGroup] = [
             ArtifactsOfResolveTotal,
             ArtifactsOfResolveRequired,
             MagicKeysRequired,
+            ConquestMedallionsPercentageRequired,
         ],
     ),
     OptionGroup(

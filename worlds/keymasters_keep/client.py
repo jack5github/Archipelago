@@ -44,6 +44,7 @@ class KeymastersKeepContext(CommonClient.CommonContext):
     id_to_item_data: Dict[int, KeymastersKeepItemData] = id_to_item_data()
     id_to_location_data: Dict[int, KeymastersKeepLocationData] = id_to_location_data()
 
+    area_completion_locations: Dict[KeymastersKeepRegions, KeymastersKeepLocationData]
     area_game_optional_constraints: Dict[str, List[str]]
     area_games: Dict[str, str]
     area_trial_game_objectives: Dict[str, str]
@@ -52,6 +53,7 @@ class KeymastersKeepContext(CommonClient.CommonContext):
     area_trials_minimum: int
     artifacts_of_resolve_required: int
     artifacts_of_resolve_total: int
+    conquest_medallions_required: int
     completed_locations_queue: collections.deque
     game_medley_mode: bool
     game_medley_percentage_chance: int
@@ -140,6 +142,7 @@ class KeymastersKeepContext(CommonClient.CommonContext):
             self.area_trial_game_objectives = _args["slot_data"]["area_trial_game_objectives"]
 
             self.area_trials = dict()
+            self.area_completion_locations = dict()
 
             area: str
             trials: List[str]
@@ -148,11 +151,15 @@ class KeymastersKeepContext(CommonClient.CommonContext):
                 self.area_trials[KeymastersKeepRegions(area)] = [
                     self.id_to_location_data[self.location_name_to_id[trial]] for trial in trials
                 ]
+                self.area_completion_locations[KeymastersKeepRegions(area)] = self.id_to_location_data[
+                    self.location_name_to_id[_args["slot_data"]["area_completion_locations"][area]]
+                ]
 
             self.area_trials_maximum = _args["slot_data"]["area_trials_maximum"]
             self.area_trials_minimum = _args["slot_data"]["area_trials_minimum"]
             self.artifacts_of_resolve_required = _args["slot_data"]["artifacts_of_resolve_required"]
             self.artifacts_of_resolve_total = _args["slot_data"]["artifacts_of_resolve_total"]
+            self.conquest_medallions_required = _args["slot_data"]["conquest_medallions_required"]
             self.game_medley_mode = _args["slot_data"]["game_medley_mode"]
             self.game_medley_percentage_chance = _args["slot_data"]["game_medley_percentage_chance"]
             self.goal = KeymastersKeepGoals(_args["slot_data"]["goal"])
@@ -322,6 +329,7 @@ class KeymastersKeepContext(CommonClient.CommonContext):
             "areas_locked_by": dict(),
             "areas_unlocked": dict(),
             "artifact_of_resolve_received": 0,
+            "conquest_medallions_received": 0,
             "goal_can_claim_victory": False,
             "goal_challenge_chamber_unlocked": False,
             "magic_keys": dict(),
@@ -343,6 +351,7 @@ class KeymastersKeepContext(CommonClient.CommonContext):
         elif self.goal == KeymastersKeepGoals.MAGIC_KEY_HEIST:
             for key in self.selected_magic_keys:
                 key_labels.append(key.value)
+        # TODO: Amend this for Area Domination goal?
 
         key_labels = sorted(key_labels)
 
@@ -391,6 +400,7 @@ class KeymastersKeepContext(CommonClient.CommonContext):
 
     def _update_game_state(self) -> None:
         artifact_of_resolve_count: int = 0
+        conquest_medallion_count: int = 0
         door_unlocks_received: List[KeymastersKeepItems] = list()
         magic_key_count: int = 0
         magic_keys_received: List[KeymastersKeepItems] = list()
@@ -422,6 +432,9 @@ class KeymastersKeepContext(CommonClient.CommonContext):
             elif item == KeymastersKeepItems.KEYMASTERS_KEEP_CHALLENGE_COMPLETE:
                 trial_count += 1
                 self.game_state["goal_can_claim_victory"] = True
+            # Conquest Medallions
+            elif item == KeymastersKeepItems.CONQUEST_MEDALLION:
+                conquest_medallion_count += 1
 
         # Magic Keys
         self.game_state["magic_keys_received"] = magic_key_count
@@ -483,6 +496,14 @@ class KeymastersKeepContext(CommonClient.CommonContext):
             self.game_state["trials_available"][area] = available_trials
 
         self.game_state["trial_count"] = trial_count
+
+        # Conquest Medallions
+        self.game_state["conquest_medallions_received"] = conquest_medallion_count
+        if (
+            self.goal == KeymastersKeepGoals.AREA_DOMINATION
+            and self.game_state["conquest_medallions_received"] >= self.conquest_medallions_required
+        ):
+            self.game_state["goal_can_claim_victory"] = True
 
         # Shop Items Purchased
         if self.shops:

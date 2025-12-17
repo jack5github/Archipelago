@@ -80,11 +80,15 @@ def id_to_goals() -> Dict[int, KeymastersKeepGoals]:
     return {goal.value: goal for goal in KeymastersKeepGoals}
 
 
-def access_rule_for(items: Optional[List[KeymastersKeepItems]], player: int) -> Optional[str]:
+def access_rule_for(
+    items: Optional[List[KeymastersKeepItems]], player: int, count: Optional[int] = None
+) -> Optional[str]:
     if items is None:
         return None
     elif len(items) == 1:
-        return f"lambda state: state.has(\"{items[0].value}\", {player})"
+        if count is None:
+            return f"lambda state: state.has(\"{items[0].value}\", {player})"
+        return f"lambda state: state.has(\"{items[0].value}\", {player}, {count})"
 
     item_strings: List[str] = list()
 
@@ -92,4 +96,6 @@ def access_rule_for(items: Optional[List[KeymastersKeepItems]], player: int) -> 
     for item in items:
         item_strings.append(f"\"{item.value}\"")
 
-    return f"lambda state: state.has_all([{', '.join(item_strings)}], {player})"
+    if count is None:
+        return f"lambda state: state.has_all([{', '.join(item_strings)}], {player})"
+    return "lambda state: state.has_all_counts({" + f": {count}, ".join(item_strings) + "}, " + str(player) + ")"

@@ -368,6 +368,8 @@ class SeedInformationGoalLayout(ScrollView):
 
     magic_keys_label: Label
 
+    medallions_label: Label
+
     claim_victory_button: Button
 
     def __init__(self, ctx: KeymastersKeepContext):
@@ -537,6 +539,36 @@ class SeedInformationGoalLayout(ScrollView):
 
             self.layout.add_widget(self.magic_keys_label)
 
+        elif self.ctx.goal == KeymastersKeepGoals.AREA_DOMINATION:
+            goal_description_label: Label = Label(
+                text="[b]Area Domination[/b]\nRetrieve Conquest Medallions by completing areas and escape!",
+                markup=True,
+                size_hint_y=None,
+                height="90dp",
+                halign="left",
+                valign="middle",
+            )
+
+            self.layout.add_widget(goal_description_label)
+
+            self.medallions_label: Label = Label(
+                text=(
+                    f"[b]Conquest Medallions[/b]\n"
+                    f"Retrieved [color=00FA9A]{self.ctx.game_state['conquest_medallions_received']}[/color] of "
+                    f"[color=00FA9A]{self.ctx.conquest_medallions_required}[/color] needed "
+                    f"([color=888888]{len(self.ctx.area_trials)} total[/color])"
+                ),
+                markup=True,
+                size_hint_y=None,
+                height="60dp",
+                halign="left",
+                valign="middle",
+            )
+
+            self.medallions_label.bind(size=lambda label, size: setattr(label, "text_size", size))
+
+            self.layout.add_widget(self.medallions_label)
+
         self.claim_victory_button = Button(
             text="Claim Victory!",
             size_hint_y=None,
@@ -571,6 +603,13 @@ class SeedInformationGoalLayout(ScrollView):
                 f"Retrieved [color=00FA9A]{self.ctx.game_state['magic_keys_received']}[/color] of "
                 f"[color=00FA9A]{self.ctx.magic_keys_required}[/color] needed "
                 f"([color=888888]{self.ctx.magic_keys_total} total[/color])"
+            )
+        elif self.ctx.goal == KeymastersKeepGoals.AREA_DOMINATION:
+            self.medallions_label.text = (
+                f"[b]Conquest Medallions[/b]\n"
+                f"Retrieved [color=00FA9A]{self.ctx.game_state['conquest_medallions_received']}[/color] of "
+                f"[color=00FA9A]{self.ctx.conquest_medallions_required}[/color] needed "
+                f"([color=888888]{len(self.ctx.area_trials)} total[/color])"
             )
 
         if self.ctx.goal_completed:
@@ -807,6 +846,12 @@ class AvailableTrialLayout(BoxLayout):
     def on_complete_button_press(self, _) -> None:
         self.complete_button.disabled = True
         self.ctx.complete_location(self.trial.archipelago_id)
+        for trial in self.ctx.area_trials[self.area]:
+            if trial.archipelago_id not in self.ctx.location_ids_checked:
+                return
+        self.ctx.complete_location(
+            self.ctx.area_completion_locations[self.area].archipelago_id
+        )
 
     def on_copy_button_press(self, _) -> None:
         Clipboard.copy(self.ctx.area_trial_game_objectives[self.trial.name])
