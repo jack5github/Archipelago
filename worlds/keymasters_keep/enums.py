@@ -55,6 +55,7 @@ class KeymastersKeepGamePlatforms(enum.Enum):
     IMOD = "IMOD"  # NTT DoCoMo i-mode
     INTV = "INTV"  # Intellivision, Intellivision II
     IOS = "IOS"  # Apple iOS: iPad, iPod, iPhone
+    IRL = "IRL"  # In Real Life (Physical)
     J2ME = "J2ME"  # Sun Java 2 Micro Edition
     JAG = "JAG"  # Atari Jaguar
     JCD = "JCD"  # Atari Jaguar CD
