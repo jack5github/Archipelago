@@ -395,7 +395,7 @@ class SeedInformationGoalLayout(ScrollView):
 
         self.layout.add_widget(seed_information_title_label)
 
-        lm: Dict[Any, str] = label_mapping
+        lm: dict[Any, str] = label_mapping
 
         game_medley_mode_label: str = lm[self.ctx.game_medley_mode]
 
@@ -1638,8 +1638,8 @@ class ShopItemLayout(BoxLayout):
 
         self.add_widget(self.purchase_button)
 
-        self.item_text = f"[color={item_classification_to_colors[self.shop_item_data['item']['classification']]}][b]{self.shop_item_data['item']['name']}[/b][/color]    "
-        self.item_text += f"[b]Rarity:[/b] {item_classification_to_rarities[self.shop_item_data['item']['classification']]}    "
+        self.item_text = f"[color={item_classification_to_colors.get(self.shop_item_data['item']['classification'], 'AF99EF')}][b]{self.shop_item_data['item']['name']}[/b][/color]    "
+        self.item_text += f"[b]Rarity:[/b] {item_classification_to_rarities.get(self.shop_item_data['item']['classification'], 'Unknown')}    "
 
         player_data: Dict[str, Any] = self.shop_item_data["item"]["player"]
         self.item_text += f"[b]Original Owner:[/b] [color=EE00EE]{player_data['name']}[/color] of [color=6D8BE8]{player_data['game']}[/color]    "

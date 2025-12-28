@@ -1,17 +1,18 @@
-from typing import Any, Dict, Tuple
+from typing import Any
+
+from BaseClasses import ItemClassification
 
 from ..enums import (
+    KeymastersKeepGamePlatforms,
     KeymastersKeepGoals,
     KeymastersKeepItems,
     KeymastersKeepLocations,
-    KeymastersKeepGamePlatforms,
     KeymastersKeepRegions,
-    KeymastersKeepShops,
     KeymastersKeepShopkeepers,
+    KeymastersKeepShops,
 )
 
-
-color_to_hex_codes: Dict[str, str] = {
+color_to_hex_codes: dict[str, str] = {
     "aliceblue": "F0F8FF",
     "antiquewhite": "FAEBD7",
     "aqua": "00FFFF",
@@ -161,45 +162,36 @@ color_to_hex_codes: Dict[str, str] = {
     "yellowgreen": "9ACD32",
 }
 
-item_classification_to_colors: Dict[int, str] = {
-    0: "00EEEE",
-    1: "AF99EF",
-    2: "6D8BE8",
-    3: "AF99EF",
-    4: "FA8072",
-    5: "AF99EF",
-    6: "6D8BE8",
-    7: "AF99EF",
-    8: "00EEEE",
-    9: "AF99EF",
-    10: "6D8BE8",
-    11: "AF99EF",
-    12: "FA8072",
-    13: "AF99EF",
-    14: "6D8BE8",
-    15: "AF99EF",
+def item_classification_to_color(classification: ItemClassification) -> str:
+    if classification & ItemClassification.progression:
+        return "AF99EF"  # Medium Orchid
+    if classification & ItemClassification.trap:
+        return "FA8072"  # Salmon
+    if classification & ItemClassification.useful:
+        return "6D8BE8"  # Medium Slate Blue
+    return "00EEEE"      # Turquoise
+
+item_classification_to_colors: dict[int, str] = {
+    c: item_classification_to_color(ItemClassification(c)) for c in range(sum(ItemClassification) + 1)
 }
 
-item_classification_to_rarities: Dict[int, str] = {
-    0: "Common",
-    1: "Rare",
-    2: "Magic",
-    3: "Rare",
-    4: "Cursed",
-    5: "Cursed Rare",
-    6: "Cursed Magic",
-    7: "Cursed Rare",
-    8: "Common",
-    9: "Rare",
-    10: "Magic",
-    11: "Rare",
-    12: "Cursed",
-    13: "Cursed Rare",
-    14: "Cursed Magic",
-    15: "Cursed Rare",
+def rarity_name(classification: ItemClassification) -> str:
+    text = ""
+    if classification & ItemClassification.trap:
+        text += "Cursed "
+    elif classification & ItemClassification.deprioritized:
+        text += "Forgotten "
+    if classification & ItemClassification.progression:
+        text += "Rare "
+    elif classification & ItemClassification.useful:
+        text += "Magic "
+    return text.strip() or "Common"
+
+item_classification_to_rarities: dict[int, str] = {
+    c: rarity_name(ItemClassification(c)) for c in range(sum(ItemClassification) + 1)
 }
 
-key_item_to_colors: Dict[KeymastersKeepItems, Tuple[str, str]] = {
+key_item_to_colors: dict[KeymastersKeepItems, tuple[str, str]] = {
     KeymastersKeepItems.KEY_AMBER_INFERNO: ("orange", "darkorange"),
     KeymastersKeepItems.KEY_AMBER_STONE: ("gold", "darkgoldenrod"),
     KeymastersKeepItems.KEY_ASHEN_SPARK: ("gray", "orangered"),
@@ -252,7 +244,7 @@ key_item_to_colors: Dict[KeymastersKeepItems, Tuple[str, str]] = {
     KeymastersKeepItems.KEY_VOID_EMBER: ("black", "orangered"),
 }
 
-label_mapping: Dict[Any, str] = {
+label_mapping: dict[Any, str] = {
     False: "Off",
     True: "On",
     KeymastersKeepGoals.KEYMASTERS_CHALLENGE: "Keymaster's Challenge",
@@ -311,6 +303,7 @@ label_mapping: Dict[Any, str] = {
     KeymastersKeepGamePlatforms.IMOD: "NTT DoCoMo i-mode",
     KeymastersKeepGamePlatforms.INTV: "Intellivision, Intellivision II",
     KeymastersKeepGamePlatforms.IOS: "Apple iOS",
+    KeymastersKeepGamePlatforms.IRL: "In Real Life (Physical)",
     KeymastersKeepGamePlatforms.J2ME: "Sun Java 2 Micro Edition",
     KeymastersKeepGamePlatforms.JAG: "Atari Jaguar",
     KeymastersKeepGamePlatforms.JCD: "Atari Jaguar CD",
@@ -362,6 +355,7 @@ label_mapping: Dict[Any, str] = {
     KeymastersKeepGamePlatforms.SMS: "Sega Master System",
     KeymastersKeepGamePlatforms.SNES: "Super Nintendo Entertainment System",
     KeymastersKeepGamePlatforms.SW: "Nintendo Switch",
+    KeymastersKeepGamePlatforms.SW2: "Nintendo Switch 2",
     KeymastersKeepGamePlatforms.SYM: "Symbian",
     KeymastersKeepGamePlatforms.TD: "NEC TurboDuo",
     KeymastersKeepGamePlatforms.TG16: "NEC TurboGrafx-16",
@@ -399,7 +393,7 @@ label_mapping: Dict[Any, str] = {
     KeymastersKeepGamePlatforms.ZXS: "Sinclair ZX Spectrum",
 }
 
-region_to_trial_locations: Dict[KeymastersKeepRegions, KeymastersKeepLocations] = {
+region_to_trial_locations: dict[KeymastersKeepRegions, KeymastersKeepLocations] = {
     KeymastersKeepRegions.THE_ARCANE_DOOR: KeymastersKeepLocations.THE_ARCANE_DOOR_TRIAL,
     KeymastersKeepRegions.THE_ARCANE_PASSAGE: KeymastersKeepLocations.THE_ARCANE_PASSAGE_TRIAL,
     KeymastersKeepRegions.THE_ARCANE_THRESHOLD: KeymastersKeepLocations.THE_ARCANE_THRESHOLD_TRIAL,
@@ -502,7 +496,7 @@ region_to_trial_locations: Dict[KeymastersKeepRegions, KeymastersKeepLocations] 
     KeymastersKeepRegions.THE_WHISPERING_DOOR: KeymastersKeepLocations.THE_WHISPERING_DOOR_TRIAL,
 }
 
-region_to_completion_location: Dict[KeymastersKeepRegions, KeymastersKeepLocations] = {
+region_to_completion_location: dict[KeymastersKeepRegions, KeymastersKeepLocations] = {
     KeymastersKeepRegions.THE_ARCANE_DOOR: KeymastersKeepLocations.THE_ARCANE_DOOR_COMPLETE,
     KeymastersKeepRegions.THE_ARCANE_PASSAGE: KeymastersKeepLocations.THE_ARCANE_PASSAGE_COMPLETE,
     KeymastersKeepRegions.THE_ARCANE_THRESHOLD: KeymastersKeepLocations.THE_ARCANE_THRESHOLD_COMPLETE,
@@ -605,7 +599,7 @@ region_to_completion_location: Dict[KeymastersKeepRegions, KeymastersKeepLocatio
     KeymastersKeepRegions.THE_WHISPERING_DOOR: KeymastersKeepLocations.THE_WHISPERING_DOOR_COMPLETE,
 }
 
-region_to_unlock_location_and_item: Dict[KeymastersKeepRegions, Tuple[KeymastersKeepLocations, KeymastersKeepItems]] = {
+region_to_unlock_location_and_item: dict[KeymastersKeepRegions, tuple[KeymastersKeepLocations, KeymastersKeepItems]] = {
     KeymastersKeepRegions.THE_ARCANE_DOOR: (
         KeymastersKeepLocations.THE_ARCANE_DOOR_UNLOCK, KeymastersKeepItems.UNLOCK_THE_ARCANE_DOOR
     ),
@@ -908,7 +902,7 @@ region_to_unlock_location_and_item: Dict[KeymastersKeepRegions, Tuple[Keymasters
     ),
 }
 
-shop_to_shop_item_locations: Dict[KeymastersKeepShops, KeymastersKeepLocations] = {
+shop_to_shop_item_locations: dict[KeymastersKeepShops, KeymastersKeepLocations] = {
     KeymastersKeepShops.ABYSSFORGE_CURIOS: KeymastersKeepLocations.SHOP_ABYSSFORGE_CURIOS_ITEM,
     KeymastersKeepShops.ARCANE_LANTERN_WORKSHOP: KeymastersKeepLocations.SHOP_ARCANE_LANTERN_WORKSHOP_ITEM,
     KeymastersKeepShops.ASTRAL_ECHO_ATELIER: KeymastersKeepLocations.SHOP_ASTRAL_ECHO_ATELIER_ITEM,
@@ -961,7 +955,7 @@ shop_to_shop_item_locations: Dict[KeymastersKeepShops, KeymastersKeepLocations] 
     KeymastersKeepShops.VOIDSPIRE_VAULT: KeymastersKeepLocations.SHOP_VOIDSPIRE_VAULT_ITEM,
 }
 
-shopkeeper_greetings: Dict[KeymastersKeepShopkeepers, str] = {
+shopkeeper_greetings: dict[KeymastersKeepShopkeepers, str] = {
     KeymastersKeepShopkeepers.AURELIA_IRONQUILL: "Step inside and sign your fate in ink forged from celestial steel",
     KeymastersKeepShopkeepers.AURETH_THE_LUMINARCH: "Behold my shining wares... may they light the darkest corners of your journey",
     KeymastersKeepShopkeepers.BARIS_THE_SHADOWFORGED: "Welcome to where dusk and steel entwine... find your edge here",
