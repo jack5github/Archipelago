@@ -141,8 +141,8 @@ class KeymastersKeepContext(CommonClient.CommonContext):
             self.area_games = _args["slot_data"]["area_games"]
             self.area_trial_game_objectives = _args["slot_data"]["area_trial_game_objectives"]
 
-            self.area_trials = dict()
-            self.area_completion_locations = dict()
+            self.area_trials = {}
+            self.area_completion_locations = {}
 
             area: str
             trials: list[str]
