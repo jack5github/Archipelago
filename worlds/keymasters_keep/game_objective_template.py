@@ -41,7 +41,10 @@ class GameObjectiveTemplate:
             else:
                 k = collection[1]
 
-            evaluated_collection = collection[0]()
+            if callable(collection[0]):
+                evaluated_collection = collection[0]()
+            else:
+                evaluated_collection = collection[0]
             if not evaluated_collection:
                 raise OptionError(f"Game objective template {self.label} has no valid entries for {key}")
             if isinstance(evaluated_collection, set):
