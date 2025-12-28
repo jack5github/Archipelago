@@ -145,15 +145,16 @@ class KeymastersKeepContext(CommonClient.CommonContext):
             self.area_completion_locations = dict()
 
             area: str
-            trials: List[str]
+            trials: list[str]
             for area, trials in _args["slot_data"]["area_trials"].items():
                 trial: str
                 self.area_trials[KeymastersKeepRegions(area)] = [
                     self.id_to_location_data[self.location_name_to_id[trial]] for trial in trials
                 ]
-                self.area_completion_locations[KeymastersKeepRegions(area)] = self.id_to_location_data[
-                    self.location_name_to_id[_args["slot_data"]["area_completion_locations"][area]]
-                ]
+                if "area_completion_locations" in _args["slot_data"]:
+                    self.area_completion_locations[KeymastersKeepRegions(area)] = self.id_to_location_data[
+                        self.location_name_to_id[_args["slot_data"]["area_completion_locations"][area]]
+                    ]
 
             self.area_trials_maximum = _args["slot_data"]["area_trials_maximum"]
             self.area_trials_minimum = _args["slot_data"]["area_trials_minimum"]
