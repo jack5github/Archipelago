@@ -247,8 +247,8 @@ class GrappleDogWorld(World):
             },
             "Objects": {"Bounce Pads", "Balloons", "Cannons", "Carrots"},
             "Gadgets": {"Cosmic Phone", "Cosmic Bulb", "Cosmic Disc", "Cosmic Battery"},
-            "Worlds": {"World 1", "World 2", "World 3", "World 4", "World 5", "World 6"},
-            "Stages": {
+            "World Access": {"World 1", "World 2", "World 3", "World 4", "World 5", "World 6"},
+            "Stage Access": {
                 item.name for item in item_pool if
                 item.name.startswith("Bonus") or item.name.startswith("Level")
             },
@@ -256,11 +256,11 @@ class GrappleDogWorld(World):
         self.item_name_groups["Features"] = {
             *self.item_name_groups["Abilities"], *self.item_name_groups["Objects"]
         }
-        self.item_name_groups["Bonuses"] = {
-            item for item in self.item_name_groups["Stages"] if item.startswith("Bonus")
+        self.item_name_groups["Bonus Access"] = {
+            item for item in self.item_name_groups["Stage Access"] if item.startswith("Bonus")
         }
-        self.item_name_groups["Levels"] = {
-            item for item in self.item_name_groups["Stages"] if item.startswith("Level")
+        self.item_name_groups["Level Access"] = {
+            item for item in self.item_name_groups["Stage Access"] if item.startswith("Level")
         }
                         
         un_filled_loc_size = len(self.multiworld.get_unfilled_locations(self.player))
