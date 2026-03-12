@@ -58,7 +58,31 @@ class GrappleDogWorld(World):
         max_boss_gems_needed = max(self.options.gems_for_boss_one.value, self.options.gems_for_boss_two.value, self.options.gems_for_boss_three.value, self.options.gems_for_boss_four.value, self.options.gems_for_boss_five.value)
         self.options.minimum_gems_in_pool.value = max(self.options.minimum_gems_in_pool.value, max_boss_gems_needed)
         self.extra_gems = self.options.minimum_gems_in_pool.value - max_boss_gems_needed
-        
+
+        # Re-order numbered options if out of order
+        sort_values: list[int] = sorted([
+            self.options.fruit_gem_one_target.value,
+            self.options.fruit_gem_two_target.value
+        ])
+        self.options.fruit_gem_one_target.value = sort_values[0]
+        self.options.fruit_gem_two_target.value = sort_values[1]
+        sort_values = sorted([
+            self.options.speedrunner_count_one.value,
+            self.options.speedrunner_count_two.value,
+            self.options.speedrunner_count_three.value
+        ])
+        self.options.speedrunner_count_one.value = sort_values[0]
+        self.options.speedrunner_count_two.value = sort_values[1]
+        self.options.speedrunner_count_three.value = sort_values[2]
+        sort_values = sorted([
+            self.options.boomerang_score_one.value,
+            self.options.boomerang_score_two.value,
+            self.options.boomerang_score_three.value
+        ])
+        self.options.boomerang_score_one.value = sort_values[0]
+        self.options.boomerang_score_two.value = sort_values[1]
+        self.options.boomerang_score_three.value = sort_values[2]
+
         re_gen_passthrough = getattr(self.multiworld, "re_gen_passthrough", {})
         if re_gen_passthrough and self.game in re_gen_passthrough:
             # Get the passed through slot data from the real generation
